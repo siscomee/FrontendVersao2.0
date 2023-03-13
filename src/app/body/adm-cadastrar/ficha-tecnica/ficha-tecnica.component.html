@@ -1,0 +1,326 @@
+<section class="m-4">
+  <h1 class="mb-4">Cadastrar {{ title | lowercase }}</h1>
+
+  <div class="card mb-4 p-4">
+    <div class="form pb-3">
+      <div class="form-row">
+        <div class="col-lg-2">
+          <label for="dsTipoProduto" class="font-weight-bold">Tipo de Produto</label>
+          <select id="dsTipoProduto" class="form-control" (change)="onChangeTipo($event.target)" *ngIf="tipoDeProdutos | async as tipoDeProdutos; else loading">
+            <option selected="" value="0">Selecione...</option>
+            <option *ngFor=" let produto of tipoDeProdutos" value="{{ produto.id }}">{{ produto.dsTipoProduto }}</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label for="nmCategoria" class="font-weight-bold">Categoria</label>
+          <select id="nmCategoria" class="form-control" (change)="onChangeCategoria($event.target)" *ngIf="categorias | async as categorias; else loading">
+            <option selected="" value="0">Selecione...</option>
+            <option *ngFor=" let categoria of categorias" value="{{ categoria.id }}">{{ categoria.nmCategoria }}</option>
+          </select>
+        </div>
+        <div class="col-lg-4">
+          <label for="nmProduto" class="font-weight-bold">Ficha Técnica</label>
+          <input
+            id="nmFichaTecnica"
+            (keyup)="onChangeDs($event.target)"
+            class="form-control"
+            type="text"
+            maxlength="80"
+          />
+        </div>
+        <div class="col">
+          <label for="inAtivo" class="font-weight-bold">Situação</label>
+          <select id="inAtivo" class="form-control" (change)="onChangeSituacao($event.target)">
+            <option selected value="-1">TODOS</option>
+            <option value="1">Ativo</option>
+            <option value="0">Inativo</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label style="display: block">&nbsp;</label>
+          <button type="button" class="btn btn-primary btn-block" (click)="filtrar()">Buscar</button>
+        </div>
+        <div class="col">
+          <label style="display: block;">&nbsp;</label>
+          <button class="btn btn-primary  btn-block" type="button" (click)="onExcel()">Excel</button>
+        </div>
+        <div class="col">
+          <label style="display: block">&nbsp;</label>
+          <button type="button" class="btn btn-outline-primary px-4 btn-block" (click)="abrirModal(fichaTecnica, 'Novo', true, false, false)">Novo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-3 table-responsive-xl-12">
+    <div
+      class=""
+      *ngIf="fichaTecnicas | async as fichaTecnicas; else loading"
+    >
+      <table class="table table-bordered table-striped table-hover">
+        <thead >
+          <tr>
+            <th scope="col" class="col-1" (click)="setOrder('id')">
+              Nº
+              <span class="sort-arrow" *ngIf="key == 'id'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-2" (click)="setOrder('dsTipoProduto')">
+              Tipo de Produto
+              <span class="sort-arrow" *ngIf="key == 'dsTipoProduto'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('nmCategoria')">
+              Categoria
+              <span class="sort-arrow" *ngIf="key == 'nmCategoria'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-2" (click)="setOrder('nmFichaTecnica')">
+              Ficha Técnica
+              <span class="sort-arrow" *ngIf="key == 'nmFichaTecnica'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('tempoPreparo')">
+              Tempo de Preparo(Min)
+              <span class="sort-arrow" *ngIf="key == 'tempoPreparo'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('qtdBruta')">
+              Quantidade Bruta
+              <span class="sort-arrow" *ngIf="key == 'qtdBruta'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('txDesperdicio')">
+              Taxa de Desperdício
+              <span class="sort-arrow" *ngIf="key == 'txDesperdicio'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('qtdLiquida')">
+              Quantidade Líquida
+              <span class="sort-arrow" *ngIf="key == 'qtdLiquida'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('inAtivo')">
+              Situação
+              <span class="sort-arrow" *ngIf="key == 'inAtivo'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="fichaTecnicas.length != 0">
+          <tr
+            *ngFor="
+              let fichaTecnica of fichaTecnicas
+                | paginate: { itemsPerPage: 10, currentPage: paginaAtual }
+                | orderBy: key:reverse
+            "
+          >
+            <td>{{ fichaTecnica.id }}</td>
+            <td>{{ fichaTecnica.dsTipoProduto }}</td>
+            <td>{{ fichaTecnica.nmCategoria }}</td>
+            <td>{{ fichaTecnica.nmFichaTecnica }}</td>
+            <td>{{ fichaTecnica.tempoPreparo }}</td>
+            <td>{{ fichaTecnica.qtdBruta}}</td>
+            <td>{{ fichaTecnica.txDesperdicio }}</td>
+            <td>{{ fichaTecnica.qtdLiquida }}</td>
+            <td>{{ fichaTecnica.inAtivo === "true" && 1 ? "Ativo" : "Inativo" }}</td>
+            <td>
+              <button
+                type="submit"
+                (click)="abrirModal(fichaTecnica, 'Detalhar', false, false, false)"
+                class="btn p-1"
+                placement="top"
+                ngbTooltip="Detalhar"
+              >
+                <h5>
+                  <i class="bi bi-info-circle-fill" style="color: #0d6efd"></i>
+                </h5>
+              </button>
+              <button
+                type="submit"
+                (click)="abrirModal(fichaTecnica, 'Editar', false, true, false)"
+                class="btn p-1"
+                placement="top"
+                ngbTooltip="Editar"
+              >
+                <h5>
+                  <i class="bi bi-pencil-square" style="color: #0d6efd"></i>
+                </h5>
+              </button>
+              <button
+                type="submit"
+                (click)="abrirModal(fichaTecnica, '', false, false, false)"
+                class="btn p-1"
+                placement="top"
+                ngbTooltip="Excluir"
+                [disabled]="fichaTecnica.inAtivo == 'false'"
+              >
+                <h5><i class="bi bi-x-circle" style="color: #0d6efd"></i></h5>
+              </button>
+              <button type="submit" (click)="abrirModal(fichaTecnica, 'Imprimir', false, false, true)" class="btn p-1" placement="top"
+              ngbTooltip="Imprimir">
+              <h5><i class="bi bi-printer" style="color: #0d6efd"></i></h5>
+            </button>
+            </td>
+          </tr>
+        </tbody>
+        <tbody *ngIf="fichaTecnicas.length == 0">
+          <tr>
+            <td colspan="10">Nenhum registro encontrado.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="table table-bordered table-striped table-hover" [hidden]="!listaExcel" id="excel-table">
+        <thead >
+          <tr>
+            <th scope="col" class="col-1" (click)="setOrder('id')">
+              Nº
+              <span class="sort-arrow" *ngIf="key == 'id'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-2" (click)="setOrder('dsTipoProduto')">
+              Tipo de Produto
+              <span class="sort-arrow" *ngIf="key == 'dsTipoProduto'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-2" (click)="setOrder('nmCategoria')">
+              Categoria
+              <span class="sort-arrow" *ngIf="key == 'nmCategoria'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-3" (click)="setOrder('nmFichaTecnica')">
+              Ficha Técnica
+              <span class="sort-arrow" *ngIf="key == 'nmFichaTecnica'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('tempoPreparo')">
+              Tempo de Preparo(Min)
+              <span class="sort-arrow" *ngIf="key == 'tempoPreparo'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('dtCriacao')">
+              Data da Criação
+              <span class="sort-arrow" *ngIf="key == 'dtCriacao'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('dtValidade')">
+              Data de Validade
+              <span class="sort-arrow" *ngIf="key == 'dtValidade'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('dsIngredientes')">
+              Ingredientes
+              <span class="sort-arrow" *ngIf="key == 'dsIngredientes'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('brutaQtd')">
+              Quantidade Bruta
+              <span class="sort-arrow" *ngIf="key == 'brutaQtd'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('txDesperdicio')">
+              Taxa de Desperdício
+              <span class="sort-arrow" *ngIf="key == 'txDesperdicio'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('qtdLiquida')">
+              Quantidade Líquida
+              <span class="sort-arrow" *ngIf="key == 'qtdLiquida'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('dsModoPreparo')">
+              Modo de Preparo
+              <span class="sort-arrow" *ngIf="key == 'dsModoPreparo'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('dsObservacao')">
+              Observação
+              <span class="sort-arrow" *ngIf="key == 'dsObservacao'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+            <th scope="col" class="col-1" (click)="setOrder('inAtivo')">
+              Situação
+              <span class="sort-arrow" *ngIf="key == 'inAtivo'">{{
+                reverse ? "▲" : "▼"
+              }}</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="fichaTecnicas.length != 0">
+          <tr
+            *ngFor="
+              let fichaTecnica of fichaTecnicas
+                | paginate: { itemsPerPage: 10, currentPage: paginaAtual }
+                | orderBy: key:reverse
+            "
+          >
+            <td>{{ fichaTecnica.id }}</td>
+            <td>{{ fichaTecnica.dsTipoProduto }}</td>
+            <td>{{ fichaTecnica.nmCategoria }}</td>
+            <td>{{ fichaTecnica.nmFichaTecnica }}</td>
+            <td>{{ fichaTecnica.tempoPreparo }}</td>
+            <td>{{ fichaTecnica.dtCriacao | dataBr}}</td>
+            <td>{{ fichaTecnica.dtValidade | dataBr}}</td>
+            <td>{{ fichaTecnica.dsIngredientes }}</td>
+            <td>{{ fichaTecnica.qtdBruta}}</td>
+            <td>{{ fichaTecnica.txDesperdicio }}</td>
+            <td>{{ fichaTecnica.qtdLiquida }}</td>
+            <td>{{ fichaTecnica.dsModoPreparo }}</td>
+            <td>{{ fichaTecnica.dsObservacao }}</td>
+            <td>{{ fichaTecnica.inAtivo === "true" && 1 ? "Ativo" : "Inativo" }}</td>
+          </tr>
+        </tbody>
+        <tbody *ngIf="fichaTecnicas.length == 0">
+          <tr>
+            <td colspan="8">Nenhum registro encontrado.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Você está na <strong>{{ paginaAtual }}ª</strong> página, exibindo
+        <strong>10</strong> registros de um total de
+        <strong>{{ fichaTecnicas.length }}</strong
+        >.
+      </p>
+
+      <pagination-controls
+        (pageChange)="paginaAtual = $event"
+        previousLabel="Anterior"
+        nextLabel="Próximo"
+        class="my-pagination"
+      >
+      </pagination-controls>
+    </div>
+  </div>
+  <ng-template #loading>
+    <span>Carregando Fichas Técnicas...</span>
+  </ng-template>
+</section>
